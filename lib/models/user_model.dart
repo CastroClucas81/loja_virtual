@@ -56,4 +56,16 @@ class UserModel extends Model {
         .doc(firebaseUser!.uid)
         .set(userData);
   }
+
+  bool isLoggedIn() {
+    return firebaseUser != null;
+  }
+
+  void signOut() {
+    _auth.signOut();
+
+    userData = Map();
+    firebaseUser = null;
+    notifyListeners();
+  }
 }
