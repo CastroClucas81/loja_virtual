@@ -3,15 +3,24 @@ import 'package:loja_virtual/models/user_model.dart';
 import 'package:loja_virtual/screens/signup_screen.dart';
 import 'package:scoped_model/scoped_model.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
+  _LoginScreenState createState() => _LoginScreenState();
+}
 
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  @override
+  Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        key: _scaffoldKey,
         appBar: AppBar(
           title: Text("Entrar"),
           centerTitle: true,
@@ -48,6 +57,7 @@ class LoginScreen extends StatelessWidget {
                 padding: EdgeInsets.all(16.0),
                 children: [
                   TextFormField(
+                    controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
                       hintText: "E-mail",
@@ -59,6 +69,7 @@ class LoginScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 16.0),
                   TextFormField(
+                    controller: _passwordController,
                     obscureText: true,
                     decoration: InputDecoration(
                       hintText: "Senha",
@@ -71,7 +82,29 @@ class LoginScreen extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        if (_emailController.text.isEmpty) {
+                          // ignore: deprecated_member_use
+                          _scaffoldKey.currentState!.showSnackBar(
+                            SnackBar(
+                              content:
+                                  Text("Insira o seu e-mail para recuperação."),
+                              backgroundColor: Colors.redAccent,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        } else {
+                          model.recoverPass(_emailController.text);
+                          // ignore: deprecated_member_use
+                          _scaffoldKey.currentState!.showSnackBar(
+                            SnackBar(
+                              content: Text("Confira o seu e-mail."),
+                              backgroundColor: Theme.of(context).primaryColor,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      },
                       style: TextButton.styleFrom(padding: EdgeInsets.zero),
                       child: Text(
                         "Esqueci minha senha",
@@ -84,7 +117,12 @@ class LoginScreen extends StatelessWidget {
                     onPressed: () {
                       //if (_formKey.currentState!.validate()) {}
 
-                      model.signIn();
+                      model.signIn(
+                        email: _emailController.text,
+                        pass: _passwordController.text,
+                        onSuccess: _onSuccess,
+                        onFailure: _onFailure,
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       primary: Theme.of(context).primaryColor,
@@ -99,6 +137,21 @@ class LoginScreen extends StatelessWidget {
             );
           },
         ),
+      ),
+    );
+  }
+
+  void _onSuccess() {
+    Navigator.of(context).pop();
+  }
+
+  void _onFailure() {
+    // ignore: deprecated_member_use
+    _scaffoldKey.currentState!.showSnackBar(
+      SnackBar(
+        content: Text("Falha ao Entrar!"),
+        backgroundColor: Colors.redAccent,
+        duration: Duration(seconds: 2),
       ),
     );
   }
