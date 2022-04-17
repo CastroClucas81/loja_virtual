@@ -9,6 +9,8 @@ class CartProduct {
   String? size;
   ProductData? productData;
 
+  CartProduct();
+
   CartProduct.fromDocument(DocumentSnapshot snapshot) {
     cid = snapshot.id;
     category = snapshot["category"];

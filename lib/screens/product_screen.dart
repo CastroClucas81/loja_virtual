@@ -1,6 +1,11 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:loja_virtual/datas/cart_product.dart';
 import 'package:loja_virtual/datas/product_data.dart';
+import 'package:loja_virtual/models/cart_model.dart';
+import 'package:loja_virtual/models/user_model.dart';
+import 'package:loja_virtual/screens/cart_screen.dart';
+import 'package:loja_virtual/screens/login_screen.dart';
 
 class ProductScreen extends StatefulWidget {
   final ProductData product;
@@ -146,12 +151,39 @@ class _ProductScreenState extends State<ProductScreen> {
                   SizedBox(
                     height: 44.0,
                     child: ElevatedButton(
-                      onPressed: size != null ? () {} : null,
+                      onPressed: size != null
+                          ? () {
+                              if (UserModel.of(context).isLoggedIn()) {
+                                CartProduct cp = CartProduct();
+                                cp.size = size;
+                                cp.quantity = 1;
+                                cp.pid = product.id;
+                                cp.category = product.category;
+                                cp.productData = product;
+
+                                CartModel.of(context).addCartItem(cp);
+
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => CartScreen(),
+                                  ),
+                                );
+                              } else {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => LoginScreen(),
+                                  ),
+                                );
+                              }
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
                         primary: primaryColor,
                       ),
                       child: Text(
-                        "Adicionar ao Carrinho",
+                        UserModel.of(context).isLoggedIn()
+                            ? "Adicionar ao Carrinho"
+                            : "Entre para comprar",
                         style: TextStyle(
                           fontSize: 18.0,
                         ),
